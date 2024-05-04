@@ -1,0 +1,2 @@
+exports.SUBJECT_ERROR = "SUBJECT_ERROR"
+exports.JWT_ERROR = "JWT_ERROR"
