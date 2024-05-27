@@ -1,6 +1,6 @@
 const router = require('express').Router()
 
-const { createTestMannual, createTestAuto, startTest, finishTest, testDetail, getAnswers, getTests, getDetailedAnswer } = require('../controller/testController')
+const { createTestMannual, createTestAuto, startTest, finishTest, testDetail, getAnswers, getTests, getDetailedAnswer, getTestReport } = require('../controller/testController')
 const answer = require('../middleware/answer')
 const professor = require('../middleware/professor')
 const student = require('../middleware/student')
@@ -14,5 +14,6 @@ router.post('/start/:testId', student, startTest)
 router.post('/finish', answer, finishTest)
 router.post('/answers', student, getAnswers)
 router.post('/answers/:answerId', student, getDetailedAnswer)
+router.get('/getTestReport/:testId', professor , getTestReport)
 
 module.exports = router
