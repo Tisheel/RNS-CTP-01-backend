@@ -7,6 +7,7 @@ const { default: mongoose } = require('mongoose')
 const { MONGO_ERROR } = require('../utils/ErrorNames')
 const jwt = require('jsonwebtoken')
 const { createTestMannualJoi, createTestAutoJoi, finishTestJoi } = require('../schema/testJoi')
+const student = require('../middleware/student')
 
 module.exports.createTestMannual = async (req, res, next) => {
     try {
@@ -542,3 +543,67 @@ module.exports.getDetailedAnswer = async (req, res, next) => {
 
     }
 }
+
+    module.exports.getTestReport = async (req , res , next) => {
+        try {
+            const {testId} = req.params
+            
+            if (!mongoose.isValidObjectId(testId)) {
+
+                throw new AppError(MONGO_ERROR, 'Invalid ObjectId', 400)
+    
+            }
+
+            const report = await Answer.aggregate([
+                {
+                    $match : {
+                        test : new mongoose.Types.ObjectId(testId)
+                    }
+                },
+                {
+                    $lookup : {
+                        from : 'students',
+                        localField : 'student',
+                        foreignField : '_id',
+                        as : 'student'
+                    }
+                },
+                {
+                    $project: {
+                        '_id': 0,
+                        'questions' : 0,
+                        'student._id': 0,
+                        'student.email' : 0,
+                        'student.phone' : 0,
+                        'student.sem' : 0,
+                        'student.branch' : 0,
+                        'student.section' : 0,
+                        'student.password' : 0,
+                        'student.subjects' : 0,
+                        'student.__v' : 0,
+                        'student.createdAt' : 0,
+                        'student.updatedAt' : 0,
+                        'test' : 0,
+                        'createdAt': 0,
+                        'updatedAt': 0,
+                        '__v' : 0
+                    }
+                }
+            ])
+
+            for(i=0;i<report.length;i++){
+                report[i].usn = report[i].student[0].usn
+                report[i].name = report[i].student[0].name
+                report[i].maxMarks = report[i].result.maxMarks
+                report[i].score = report[i].result.score
+                delete report[i].student
+                delete report[i].result
+            }
+
+            res.status(200).json(report)
+
+        }
+        catch(error){
+            next(error)
+        }
+    }
